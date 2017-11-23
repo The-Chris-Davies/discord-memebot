@@ -1,3 +1,9 @@
+temp.py
+settings.txt
+
+#begin auto-generated ignores
+
+
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]
@@ -31,10 +37,6 @@ wheels/
 *.manifest
 *.spec
 
-# Installer logs
-pip-log.txt
-pip-delete-this-directory.txt
-
 # Unit test / coverage reports
 htmlcov/
 .tox/
@@ -45,10 +47,6 @@ nosetests.xml
 coverage.xml
 *.cover
 .hypothesis/
-
-# Translations
-*.mo
-*.pot
 
 # Django stuff:
 *.log
@@ -73,11 +71,6 @@ target/
 # pyenv
 .python-version
 
-# celery beat schedule file
-celerybeat-schedule
-
-# SageMath parsed files
-*.sage.py
 
 # dotenv
 .env
@@ -90,9 +83,6 @@ ENV/
 # Spyder project settings
 .spyderproject
 .spyproject
-
-# Rope project settings
-.ropeproject
 
 # mkdocs documentation
 /site

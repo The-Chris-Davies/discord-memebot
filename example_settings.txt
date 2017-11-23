@@ -1,0 +1,4 @@
+#token
+token=<put token here please>
+#command prefix
+prefix=<the command prefix>
