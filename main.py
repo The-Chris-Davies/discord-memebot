@@ -1,11 +1,9 @@
 import sys
+import random
 import discord
 import asyncio
 from discord.ext.commands import Bot
 from discord.ext import commands
-
-class KillMeError(Exception):
-	pass
 
 def get_settings(fn = 'settings.txt'):
 	f=open(fn)
@@ -35,26 +33,27 @@ async def on_ready():
 			"\n\t".join(set(map(lambda x:x.name,client.get_all_members()))), 
 			discord.__version__, ))
 
-
-@client.command()
-async def test(*args):
-	await client.say("I'm alive?")
-	await asyncio.sleep(1)
-	await client.say("I'm ALIVE?!")
-	await asyncio.sleep(2)
-	await client.say("AAAAAAAAAAAAAAAAAAAAAAAAAAAAHHHHHHH")
-
-@client.command()
-async def say(*args):
-	if(len(args)):
-		await client.say(' '.join(args))
-	else:
-		await client.say('no')
-
-@client.command()
-async def die(*args):
-	global client
-	await client.say(":joy::gun:")
-	await client.logout()
+@client.event
+async def on_message(message):
+	print('message from {} in channel {}, {}:\n\t{}'.format(message.author.name, message.channel.name, message.server.name, message.content))
+	if message.author != client.user:
+		
+		#say command
+		if message.content.split()[0].lower() == 'say':
+			await client.send_message(message.channel, message.content[3:])
+			await client.delete_message(message)
+		
+		#die command
+		elif message.content.lower() == 'die':
+			await client.send_message(message.channel, random.choice((":point_right::sunglasses::point_right: zoop", ":joy::gun:")))
+			await client.logout()
+		
+		#test command
+		elif message.content.lower() == 'test':
+				await client.send_message(message.channel, "I'm alive?")
+				await asyncio.sleep(1)
+				await client.send_message(message.channel, "I'm ALIVE?!")
+				await asyncio.sleep(2)
+				await client.send_message(message.channel, "AAAAAAAAAAAAAAAAAAAAAAAAAAAAHHHHHHH")
 
 client.run(bot_data['token'])
