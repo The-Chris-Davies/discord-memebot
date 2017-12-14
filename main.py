@@ -6,8 +6,16 @@ from discord.ext.commands import Bot
 from discord.ext import commands
 
 def get_settings(fn = 'settings.txt'):
-	f=open(fn)
-	data = {}
+	data = {'fn':fn, 'tunnel':{}}
+	try:
+		f=open(fn)
+
+	except FileNotFoundError as e:
+		print("No file by name {} found! Please input info manually:".format(fn))
+		data['token'] = raw_input("What is the bot token?\n>|")
+		data['prefix'] = raw_input("what is the prefix the bot uses?\n>|")
+		return data
+		
 	for ln in f:
 		if ln[0] == '#': continue
 		sln = ln.split('=', 1)
@@ -15,13 +23,17 @@ def get_settings(fn = 'settings.txt'):
 			data['token'] = sln[1].strip()
 		if sln[0] == 'prefix':
 			data['prefix'] = sln[1].strip()
+		'''
+		if sln[0] == 'tunnel':
+			data['tunnel'][sln[1].split()[0].strip()] = sln[1].split()[1].strip()
+			data['tunnel'][sln[1].split()[1].strip()] = sln[1].split()[0].strip()
+		'''
+	f.close()
 	return data
 
-if(len(sys.argv)>1):
-	bot_data = get_settings(sys.argv[1])
-else:
-	bot_data = get_settings()
-
+random.seed()
+bot_data = get_settings(sys.argv[1] if len(sys.argv)>1 else 'settings.txt')
+pendingConnection = ''
 client = Bot(description="Make memes make sense \n Chris for president 2020", command_prefix=bot_data['prefix'], pm_help = True)
 
 @client.event
@@ -33,27 +45,78 @@ async def on_ready():
 			"\n\t".join(set(map(lambda x:x.name,client.get_all_members()))), 
 			discord.__version__, ))
 
+@client.command()
+async def hi(*args):
+	global client
+	await client.say("hey there!")
+
+@client.command()
+async def test(*args):
+	await client.say("I'm alive?")
+	await asyncio.sleep(1)
+	await client.say("I'm ALIVE?!")
+	await asyncio.sleep(2)
+	await client.say("AAAAAAAAAAAAAAAAAAAAAAAAAAAAHHHHHHH")
+
+@client.command(pass_context=True)
+async def say(op, *args):
+	if(len(args)):
+		await client.say(' '.join(args))
+	await client.delete_message(op.message)
+
+@client.command()
+async def die(*args):
+	global client
+	await client.say(random.choice((":point_right::sunglasses::point_right: zoop", ":joy::gun:")))
+	await client.logout()
+
+@client.command(pass_context = True)
+async def openportal(op, *args):
+	global bot_data, pendingConnection
+	
+	if op.message.channel in bot_data['tunnel']:
+		await client.say("You fool! A portal is already opened here!")
+	elif pendingConnection:
+		if pendingConnection == op.message.channel:
+			await client.say("You fool! You can't open two ends of a portal in the same place!")
+		else:
+			bot_data['tunnel'][pendingConnection] = op.message.channel
+			bot_data['tunnel'][op.message.channel] = pendingConnection
+			pendingConnection = ""
+			await client.say("The portal has been opened!")
+			await client.send_message(bot_data['tunnel'][op.message.channel], "The portal has been opened!")
+			'''
+			f = open(bot_data['fn'], 'a')
+			f.write("tunnel={} {}".format(op.message.channel, bot_data['tunnel'][op.message.channel]))
+			f.close()
+			'''
+	else:
+		pendingConnection = op.message.channel
+		await client.say("Portal activated! Waiting for the other end to open...")
+
+@client.command(pass_context = True)
+async def closeportal(op, *args):
+	if op.message.channel in bot_data['tunnel']:
+		endpoint = bot_data['tunnel'][op.message.channel]
+		del(bot_data['tunnel'][endpoint])
+		del(bot_data['tunnel'][op.message.channel])
+		await client.say("The portal is closed!")
+		await client.send_message(endpoint, "The portal has been closed at the other end!")
+	elif op.message.channel == pendingConnection:
+		pendingConnection == ""
+	else:
+		await client.say("You cannot close a portal that has not been opened!")
+
 @client.event
 async def on_message(message):
-	print('message from {} in channel {}, {}:\n\t{}'.format(message.author.name, message.channel.name, message.server.name, message.content))
-	if message.author != client.user:
+	await client.process_commands(message)
+	
+	#print('message from {} in channel {}, {}:\n\t{}'.format(message.author.name, message.channel.name, message.server.name, message.content))
+	
+	if message.content[0] != bot_data['prefix'] and message.author != client.user:
 		
-		#say command
-		if message.content.split()[0].lower() == 'say':
-			await client.send_message(message.channel, message.content[3:])
-			await client.delete_message(message)
-		
-		#die command
-		elif message.content.lower() == 'die':
-			await client.send_message(message.channel, random.choice((":point_right::sunglasses::point_right: zoop", ":joy::gun:")))
-			await client.logout()
-		
-		#test command
-		elif message.content.lower() == 'test':
-				await client.send_message(message.channel, "I'm alive?")
-				await asyncio.sleep(1)
-				await client.send_message(message.channel, "I'm ALIVE?!")
-				await asyncio.sleep(2)
-				await client.send_message(message.channel, "AAAAAAAAAAAAAAAAAAAAAAAAAAAAHHHHHHH")
+		#"chat portal"
+		if message.channel in bot_data['tunnel']:
+			await client.send_message(bot_data['tunnel'][message.channel], "{}:\n{}".format(message.author.name, message.content))
 
 client.run(bot_data['token'])
