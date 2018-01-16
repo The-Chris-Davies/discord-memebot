@@ -1,11 +1,5 @@
-# discord-memebot
-A discord bot that does things^tm
+# discord-portalbot
 
-# what exactly is this?
-Are you tired of people posting links and images to Discord that you've seen before? 
-Do you want to prove to your friends that you are the ultimate meme machine?
-Well your worries are over!
+This discord bot will post any comment made in one channel to another channel and vice versa, potentially even on another server.
 
-Memebot will automatically look through posts and assign a score to users based on their original posts vs. their reposts!
-
-
+This was just a simple project to get familiar with the discordpy api.
