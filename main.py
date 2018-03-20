@@ -2,8 +2,16 @@ import sys
 import random
 import discord
 import asyncio
+import logging
 from discord.ext.commands import Bot
 from discord.ext import commands
+
+#set up logging
+logger = logging.getLogger('discord')
+logger.setLevel(logging.DEBUG)
+handler = logging.FileHandler(filename='Margarets.log', encoding='utf-8', mode='w')
+handler.setFormatter(logging.Formatter('%(asctime)s:%(levelname)s:%(name)s: %(message)s'))
+logger.addHandler(handler)
 
 def get_settings(fn = 'settings.txt'):
 	data = {'fn':fn, 'tunnel':{}}
@@ -117,9 +125,23 @@ async def closeportal(op, *args):
 @client.command(pass_context = True)
 async def migrate(op, *args):
 	'''copies all of the posts in one channel to another. WIP'''
+	#use http://discordpy.readthedocs.io/en/latest/api.html#discord.Client.logs_from
+	try:
+		target = Client.get_channel(args[0])
+		await client.send_message(bot_data['tunnel'][message.channel], "Migration will start from {}!".format(op.message.channel.name)))
+	except:
+		await client.say("Could not find that channel!")
+		return
+	await client.say("migrating to {}!".format(target.name))
+	logGen = yield from client.logs_from(op.channel)
+	for msg in logGen:
+		client.send_message(target, "{}:\n{}".format(msg.author.name, msg.content))
+	
+	
 
 @client.event
 async def on_message(message):
+	'''required to run the portal'''
 	await client.process_commands(message)
 	
 	#print('message from {} in channel {}, {}:\n\t{}'.format(message.author.name, message.channel.name, message.server.name, message.content))
