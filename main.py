@@ -34,7 +34,7 @@ def get_settings(fn = 'settings.txt'):
 random.seed()
 bot_data = get_settings(sys.argv[1] if len(sys.argv)>1 else 'settings.txt')
 pendingConnection = ''
-client = Bot(description="Make memes make sense \n Chris for president 2020", command_prefix=bot_data['prefix'], pm_help = True)
+client = Bot(description="Who has any idea what they are doing here?", command_prefix=bot_data['prefix'], pm_help = True)
 
 @client.event
 async def on_ready():
@@ -47,11 +47,13 @@ async def on_ready():
 
 @client.command()
 async def hi(*args):
+	'''A test command. Serves no function.'''
 	global client
 	await client.say("hey there!")
 
 @client.command()
 async def test(*args):
+	'''A test command. Serves no function.'''
 	await client.say("I'm alive?")
 	await asyncio.sleep(1)
 	await client.say("I'm ALIVE?!")
@@ -60,18 +62,22 @@ async def test(*args):
 
 @client.command(pass_context=True)
 async def say(op, *args):
+	'''say <message>
+	makes the bot say whatever the <message> is. Your comment will be deleted.'''
 	if(len(args)):
 		await client.say(' '.join(args))
 	await client.delete_message(op.message)
 
 @client.command()
 async def die(*args):
+	'''shuts down the bot.'''
 	global client
 	await client.say(random.choice((":point_right::sunglasses::point_right: zoop", ":joy::gun:")))
 	await client.logout()
 
 @client.command(pass_context = True)
 async def openportal(op, *args):
+	'''opens a portal in this channel to a random other channel. Can span servers, as long as the bot is in the server.'''
 	global bot_data, pendingConnection
 	
 	if op.message.channel in bot_data['tunnel']:
@@ -96,6 +102,7 @@ async def openportal(op, *args):
 
 @client.command(pass_context = True)
 async def closeportal(op, *args):
+	'''Closes an already open portal. WIP'''
 	if op.message.channel in bot_data['tunnel']:
 		endpoint = bot_data['tunnel'][op.message.channel]
 		del(bot_data['tunnel'][endpoint])
@@ -106,6 +113,10 @@ async def closeportal(op, *args):
 		pendingConnection == ""
 	else:
 		await client.say("You cannot close a portal that has not been opened!")
+
+@client.command(pass_context = True)
+async def migrate(op, *args):
+	'''copies all of the posts in one channel to another. WIP'''
 
 @client.event
 async def on_message(message):
