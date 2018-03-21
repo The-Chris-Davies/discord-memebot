@@ -124,8 +124,9 @@ async def closeportal(op, *args):
 
 @client.command(pass_context = True)
 async def migrate(op, *args):
-	'''copies all of the posts in one channel to another. WIP'''
-	#use http://discordpy.readthedocs.io/en/latest/api.html#discord.Client.logs_from
+	'''migrate <channel> (number of posts)
+	copies posts from the current channel to another. Default number of posts is 50. WIP'''
+
 	try:
 		target = Client.get_channel(args[0])
 		await client.send_message(bot_data['tunnel'][message.channel], "Migration will start from {}!".format(op.message.channel.name)))
@@ -133,11 +134,15 @@ async def migrate(op, *args):
 		await client.say("Could not find that channel!")
 		return
 	await client.say("migrating to {}!".format(target.name))
-	logGen = yield from client.logs_from(op.channel)
-	for msg in logGen:
+	
+	if(len(args) > 1):
+		numMsgs = args[1]
+	else:
+		numMsgs = 50
+	
+	async for message in client.logs_from(message.channel, limit=numMsgs):
 		client.send_message(target, "{}:\n{}".format(msg.author.name, msg.content))
-	
-	
+		#TODO: does this work with embeds? http://discordpy.readthedocs.io/en/latest/api.html#embed
 
 @client.event
 async def on_message(message):
