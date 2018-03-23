@@ -125,24 +125,25 @@ async def closeportal(op, *args):
 @client.command(pass_context = True)
 async def migrate(op, *args):
 	'''migrate <channel> (number of posts)
-	copies posts from the current channel to another. Default number of posts is 50. WIP'''
-
-	try:
-		target = Client.get_channel(args[0])
-		await client.send_message(bot_data['tunnel'][message.channel], "Migration will start from {}!".format(op.message.channel.name)))
-	except:
+	copies posts from the current channel to another. Default number of posts is 50. WIP'''	
+	
+	target = op.message.channel.server.get_channel(args[0])
+	if(not target):
 		await client.say("Could not find that channel!")
-		return
 	await client.say("migrating to {}!".format(target.name))
+	await client.send_message(target, "Migration will start from {}!".format(op.message.channel.name))
 	
 	if(len(args) > 1):
-		numMsgs = args[1]
+		numMsgs = int(args[1])
 	else:
 		numMsgs = 50
 	
-	async for message in client.logs_from(message.channel, limit=numMsgs):
-		client.send_message(target, "{}:\n{}".format(msg.author.name, msg.content))
-		#TODO: does this work with embeds? http://discordpy.readthedocs.io/en/latest/api.html#embed
+	await client.say("{} messages will be copied!".format(numMsgs))
+
+	async for msg in client.logs_from(op.message.channel, limit=numMsgs):
+		client.send_message(target, 'hi')#target, "{}:\n{}".format(msg.author.name, msg.content))
+
+			#TODO: does this work with embeds? http://discordpy.readthedocs.io/en/latest/api.html#embed
 
 @client.event
 async def on_message(message):
